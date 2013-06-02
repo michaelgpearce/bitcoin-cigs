@@ -1,0 +1,1 @@
+require 'bitcoin_cigs'
