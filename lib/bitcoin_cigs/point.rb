@@ -1,6 +1,6 @@
 module BitcoinCigs
   class Point
-    include MathHelper
+    include ::BitcoinCigs::CryptoHelper
     
     attr_accessor :curve, :x, :y, :order
     

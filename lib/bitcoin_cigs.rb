@@ -1,7 +1,5 @@
-require 'base64'
-
 require 'bitcoin_cigs/error'
-require 'bitcoin_cigs/math_helper'
+require 'bitcoin_cigs/crypto_helper'
 require 'bitcoin_cigs/base_58'
 require 'bitcoin_cigs/curve_fp'
 require 'bitcoin_cigs/point'
@@ -21,7 +19,7 @@ module BitcoinCigs
   GENERATOR_SECP256K1 = ::BitcoinCigs::Point.new(CURVE_SECP256K1, Gx, Gy, R)
   
   class << self
-    include ::BitcoinCigs::MathHelper
+    include ::BitcoinCigs::CryptoHelper
     
     def verify_message(address, signature, message)
       begin

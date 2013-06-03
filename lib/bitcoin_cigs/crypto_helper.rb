@@ -3,7 +3,7 @@ require 'digest/sha2'
 require 'base64'
 
 module BitcoinCigs
-  module MathHelper
+  module CryptoHelper
     def inverse_mod(a, m)
       a = a % m if a < 0 || m <= a
       
