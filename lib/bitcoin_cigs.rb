@@ -8,6 +8,8 @@ require 'bitcoin_cigs/point'
 require 'bitcoin_cigs/public_key'
 
 module BitcoinCigs
+  PRIVATE_KEY_PREFIX = 0x80
+  
   P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
   R = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
   B = 0x0000000000000000000000000000000000000000000000000000000000000007
@@ -80,9 +82,92 @@ module BitcoinCigs
       
       nil
     end
-  
+    
+    def sign_message!(wallet_key, message)
+      private_key = convert_wallet_format_to_bytes!(wallet_key)
+    end
+    
+    def convert_wallet_format_to_bytes!(input)
+      bytes = if is_wallet_import_format?(input)
+        decode_wallet_import_format(input)
+      elsif is_compressed_wallet_import_format?(input)
+        decode_compressed_wallet_import_format(input)
+      elsif is_mini_format?(input)
+        sha256(input)
+      elsif is_hex_format?(input)
+        [input].pack('H*')
+      elsif is_base_64_format?(input)
+        Base64.decode64(input)
+      else
+        raise ::BitcoinCigs::Error.new("Unknown Wallet Format")
+      end
+      
+      bytes
+    end
+    
     private
-  
+    
+    def decode_wallet_import_format(input)
+      bytes = ::BitcoinCigs::Base58.decode(input)[1..-1]
+      hash = bytes[0..32]
+      
+      checksum = sha256(sha256(hash))
+      raise ::BitcoinCigs::Error.new("Wallet checksum invalid") if bytes[33..-1] != checksum[0...4]
+
+      version, hash = hash[0], hash[1..-1]
+      raise ::BitcoinCigs::Error.new("Wallet Version #{version} not supported") if version.ord != PRIVATE_KEY_PREFIX
+      
+      hash
+    end
+    
+    def decode_compressed_wallet_import_format(input)
+      bytes = ::BitcoinCigs::Base58.decode(input)
+      hash = bytes[0...34]
+      
+      checksum = sha256(sha256(hash))
+      raise ::BitcoinCigs::Error.new("Wallet checksum invalid") if bytes[34..-1] != checksum[0...4]
+
+      version, hash = hash[0], hash[1..32]
+      raise ::BitcoinCigs::Error.new("Wallet Version #{version} not supported") if version.ord != PRIVATE_KEY_PREFIX
+      
+      hash
+    end
+    
+    # 64 characters [0-9A-F]
+    def is_hex_format?(key)
+      /^[A-Fa-f0-9]{64}$/ =~ key
+    end
+    
+    # 51 characters base58 starting with 5
+    def is_wallet_import_format?(key)
+      /^5[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/ =~ key
+    end
+    
+    # 52 characters base58 starting with L or K
+    def is_compressed_wallet_import_format?(key)
+      /^[LK][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/ =~ key
+    end
+    
+    # 44 characters
+    def is_base_64_format?(key)
+      /^[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789=+\/]{44}$/ =~ key
+    end
+    
+    # 22, 26 or 30 characters, always starts with an 'S'
+    def is_mini_format?(key)
+      validChars22 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{21}$/ =~ key
+      validChars26 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{25}$/ =~ key
+      validChars30 = /^S[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{29}$/ =~ key
+      
+      bytes = sha256("#{key}?")
+    
+      (bytes[0].ord === 0x00 || bytes[0].ord === 0x01) && (validChars22 || validChars26 || validChars30)
+    end
+    
+    def debug_bytes(s)
+      s.chars.collect(&:ord).join(', ')
+    end
+    
     def calculate_hash(d)
       sha256(sha256(d))
     end
