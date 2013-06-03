@@ -32,7 +32,7 @@ module BitcoinCigs
     end
     
     def sha256(d)
-      (Digest::SHA2.new << d).digest
+      (Digest::SHA256.new << d).digest
     end
     
     def sqrt_mod(a, p)
