@@ -610,6 +610,22 @@ FTVerbose=True
 # print ASv1CS(pvk1, text4)
 # print 
 # print ASv1CS(pvk1, text5)
-print verifySignature('13C5HZKutjMDeuc7f5mPj6XGpJCZu7xKh2', 'H55JIuwEi4YXzINOzx2oU6VsfBcTOScpFtp10pP/M4EWV336ClH65SObwPXnRf/fMXDu8hs8nweB42CtpWgngeM=', 'abc')
+
+public_key = "11o51X3ciSjoLWFN3sbg3yzCM8RSuD2q9"
+# private_key = "5JFZuDkLgbEXK4CUEiXyyz4fUqzAsQ5QUqufdJy8MoLA9S1RdNX" # WIF Base58 51 char (start w 5)
+# private_key = "Ky9JDVGHsk6gnh7dDYKkWWsAquDLZSrSdtsTVGJjUoVZN7sYjyyP" # WIF Base58 52 char (start w K or L)
+# private_key = "39678A14ECA8479B3C58DCD25A5C94BE768389E823435C4DDFCAEB13519AB10E" # HEX 64 chars
+# private_key = "OWeKFOyoR5s8WNzSWlyUvnaDiegjQ1xN38rrE1GasQ4=" # Base64 44 chars
+## ["39678A14ECA8479B3C58DCD25A5C94BE768389E823435C4DDFCAEB13519AB10E"].pack('H*')
+private_key = "9g\x8A\x14\xEC\xA8G\x9B<X\xDC\xD2Z\\\x94\xBEv\x83\x89\xE8#C\\M\xDF\xCA\xEB\x13Q\x9A\xB1\x0E"
+msg = "this is a message"
+signature = sign_message_Bitcoin(private_key, msg)['b64-signature']
+print signature
+
+#print verifySignature(public_key, signature, msg)
+
+#print verifySignature(public_key, signature, msg)
+
+#print verifySignature('13C5HZKutjMDeuc7f5mPj6XGpJCZu7xKh2', 'H55JIuwEi4YXzINOzx2oU6VsfBcTOScpFtp10pP/M4EWV336ClH65SObwPXnRf/fMXDu8hs8nweB42CtpWgngeM=', 'abc')
 
 #print verifySignature('13C5HZKutjMDeuc7f5mPj6XGpJCZu7xKh2', 'H55JIuwEi4YXzINOzx2oU6VsfBcTOScpFtp10pP/M4EWV336ClH65SObwPXnRf/fMXDu8hs8nweB42CtpWgngeM=', 'aaa')
