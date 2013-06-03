@@ -31,7 +31,7 @@ module BitcoinCigs
     end
     
     def verify_message!(address, signature, message)
-      network_version = str_to_num(::BitcoinCigs::Base58.decode(address)) >> (8 * 24)
+      network_version = str_to_num(decode58(address)) >> (8 * 24)
 
       message = calculate_hash(format_message_to_sign(message))
 
@@ -41,7 +41,7 @@ module BitcoinCigs
       
       order = g.order
       
-      sig = Base64.decode64(signature)
+      sig = decode64(signature)
       raise ::BitcoinCigs::Error.new("Bad signature") if sig.size != 65
       
       hb = sig[0].ord
@@ -95,7 +95,7 @@ module BitcoinCigs
       elsif is_hex_format?(input)
         [input].pack('H*')
       elsif is_base_64_format?(input)
-        Base64.decode64(input)
+        decode64(input)
       else
         raise ::BitcoinCigs::Error.new("Unknown Wallet Format")
       end
@@ -106,7 +106,7 @@ module BitcoinCigs
     private
     
     def decode_wallet_import_format(input)
-      bytes = ::BitcoinCigs::Base58.decode(input)[1..-1]
+      bytes = decode58(input)[1..-1]
       hash = bytes[0..32]
       
       checksum = sha256(sha256(hash))
@@ -119,7 +119,7 @@ module BitcoinCigs
     end
     
     def decode_compressed_wallet_import_format(input)
-      bytes = ::BitcoinCigs::Base58.decode(input)
+      bytes = decode58(input)
       hash = bytes[0...34]
       
       checksum = sha256(sha256(hash))
@@ -185,7 +185,7 @@ module BitcoinCigs
       h = calculate_hash(vh160)
       addr = vh160 + h[0...4]
       
-      ::BitcoinCigs::Base58.encode(addr)
+      encode58(addr)
     end
     
     def hash_160(public_key)

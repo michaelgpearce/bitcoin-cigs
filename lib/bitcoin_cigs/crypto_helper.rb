@@ -4,6 +4,22 @@ require 'base64'
 
 module BitcoinCigs
   module CryptoHelper
+    def encode64(s)
+      Base64.encode64(s)
+    end
+    
+    def decode64(s)
+      Base64.decode64(s)
+    end
+    
+    def encode58(s)
+      ::BitcoinCigs::Base58.encode(s)
+    end
+    
+    def decode58(s)
+      ::BitcoinCigs::Base58.decode(s)
+    end
+    
     def inverse_mod(a, m)
       a = a % m if a < 0 || m <= a
       
