@@ -23,7 +23,7 @@ end
 # Credits
 
 Thanks to jackjack for pointing me to Armory's implementation of message signatures:
-https://github.com/jackjack-jj/jasvet/blob/master/jasvet.py
+https://github.com/jackjack-jj/jasvet
 
 [Bitcoin Cigs](https://github.com/michaelgpearce/bitcoin-cigs) is maintained by [Michael Pearce](https://github.com/michaelgpearce).
 
