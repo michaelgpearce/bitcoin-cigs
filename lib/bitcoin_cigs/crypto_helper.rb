@@ -4,8 +4,12 @@ require 'base64'
 
 module BitcoinCigs
   module CryptoHelper
+    def decode_hex(s)
+      [s].pack('H*')
+    end
+    
     def encode64(s)
-      Base64.encode64(s)
+      Base64.strict_encode64(s)
     end
     
     def decode64(s)

@@ -1,11 +1,49 @@
 require 'spec_helper'
 
 describe BitcoinCigs do
+  let(:wallet_key) { "5JFZuDkLgbEXK4CUEiXyyz4fUqzAsQ5QUqufdJy8MoLA9S1RdNX" }
   let(:address) { "11o51X3ciSjoLWFN3sbg3yzCM8RSuD2q9" }
   let(:original_address) { "11o51X3ciSjoLWFN3sbg3yzCM8RSuD2q9" }
   let(:private_key) { ["39678A14ECA8479B3C58DCD25A5C94BE768389E823435C4DDFCAEB13519AB10E"].pack('H*') }
   let(:signature) { "HIBYi2g3yFimzD/YSD9j+PYwtsdCuHR2xwIQ6n0AN6RPUVDGttgOmlnsiwx90ZSjmaWrH1/HwrINJbaP7eMA6V4=" }
+  
   let(:message) { "this is a message" }
+  
+  describe "sign_message!" do
+    subject { BitcoinCigs.sign_message!(wallet_key, message) }
+    
+    context "with valid data" do
+      it "generates the correct signature" do
+        expect(BitcoinCigs.verify_message(address, subject, message)).to be_true
+      end
+    end
+    
+    context "invalid wallet key" do
+      let(:wallet_key) { "invalid wallet key" }
+      
+      it "raises an error" do
+        expect { subject }.to raise_error(::BitcoinCigs::Error, "Unknown Wallet Format")
+      end
+    end
+  end
+  
+  describe "sign_message" do
+    subject { BitcoinCigs.sign_message(wallet_key, message) }
+    
+    context "with valid data" do
+      it "generates the correct signature" do
+        expect(BitcoinCigs.verify_message(address, subject, message)).to be_true
+      end
+    end
+    
+    context "invalid wallet key" do
+      let(:wallet_key) { "invalid wallet key" }
+      
+      it "returns nil" do
+        expect(subject).to be_nil
+      end
+    end
+  end
   
   describe "convert_wallet_format_to_bytes!" do
     subject { BitcoinCigs.convert_wallet_format_to_bytes!(wallet_key) }

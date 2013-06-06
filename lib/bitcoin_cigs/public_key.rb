@@ -1,5 +1,7 @@
 module BitcoinCigs
   class PublicKey
+    include ::BitcoinCigs::CryptoHelper
+    
     attr_accessor :curve, :generator, :point, :compressed
     
     def initialize(generator, point, compressed)
@@ -17,6 +19,26 @@ module BitcoinCigs
       end
     end
 
+    def verify(hash, signature)
+      hash = str_to_num(hash) if hash.is_a?(String)
+      
+      g = generator
+      n = g.order
+      r = signature.r
+      s = signature.s
+      
+      return false if r < 1 || r > n-1
+      return false if s < 1 || s > n-1
+        
+      c = inverse_mod(s, n)
+      u1 = (hash * c) % n
+      u2 = (r * c) % n
+      xy = g * u1 + point * u2
+      v = xy.x % n
+      
+      v == r
+    end
+    
     def ser
       if compressed
         if point.y & 1 > 0
@@ -28,7 +50,7 @@ module BitcoinCigs
         key = '04%064x%064x' % [point.x, point.y]
       end
       
-      [key].pack('H*')
+      decode_hex(key)
     end
   end
 end

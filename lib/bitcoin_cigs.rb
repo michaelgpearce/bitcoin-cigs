@@ -4,6 +4,9 @@ require 'bitcoin_cigs/base_58'
 require 'bitcoin_cigs/curve_fp'
 require 'bitcoin_cigs/point'
 require 'bitcoin_cigs/public_key'
+require 'bitcoin_cigs/private_key'
+require 'bitcoin_cigs/signature'
+require 'bitcoin_cigs/ec_key'
 
 module BitcoinCigs
   PRIVATE_KEY_PREFIX = 0x80
@@ -81,8 +84,42 @@ module BitcoinCigs
       nil
     end
     
+    def sign_message(wallet_key, message)
+      begin
+        sign_message!(wallet_key, message)
+      rescue ::BitcoinCigs::Error
+        nil
+      end
+    end
+    
     def sign_message!(wallet_key, message)
       private_key = convert_wallet_format_to_bytes!(wallet_key)
+      
+      msg_hash = sha256(sha256(format_msg_to_sign(message)))
+      
+      ec_key = ::BitcoinCigs::EcKey.new(str_to_num(private_key))
+      private_key = ec_key.private_key
+      public_key = ec_key.public_key
+      addr = public_key_to_bc_address(get_pub_key(ec_key, ec_key.public_key.compressed))
+      
+      sig = private_key.sign(msg_hash, random_k)
+      raise ::BitcoinCigs::Error.new("Unable to sign message") unless public_key.verify(msg_hash, sig)
+      
+      4.times do |i|
+        hb = 27 + i
+        
+        sign = "#{hb.chr}#{sig.ser}"
+        sign_64 = encode64(sign)
+        
+        begin
+          verify_message!(addr, sign_64, message)
+          return sign_64
+        rescue ::BitcoinCigs::Error
+          next
+        end
+      end
+      
+      raise ::BitcoinCigs::Error, "Unable to construct recoverable key"
     end
     
     def convert_wallet_format_to_bytes!(input)
@@ -93,7 +130,7 @@ module BitcoinCigs
       elsif is_mini_format?(input)
         sha256(input)
       elsif is_hex_format?(input)
-        [input].pack('H*')
+        decode_hex(input)
       elsif is_base_64_format?(input)
         decode64(input)
       else
@@ -105,6 +142,33 @@ module BitcoinCigs
     
     private
     
+    def format_msg_to_sign(message)
+      return "\x18Bitcoin Signed Message:\n#{message.size.chr}#{message}"
+    end
+    
+    def random_k
+      k = 0
+      8.times do |i|
+        k |= (rand * 0xffffffff).to_i << (32 * i)
+      end
+      
+      k
+    end
+        
+    def get_pub_key(public_key, compressed)
+      i2o_ec_public_key(public_key, compressed)
+    end
+    
+    def i2o_ec_public_key(public_key, compressed)
+      key = if compressed
+        "#{public_key.public_key.point.y & 1 > 0 ? '03' : '02'}%064x" % public_key.public_key.point.x
+      else
+        "04%064x%064x" % [public_key.public_key.point.x, public_key.public_key.point.y]
+      end
+
+      decode_hex(key)
+    end
+
     def decode_wallet_import_format(input)
       bytes = decode58(input)[1..-1]
       hash = bytes[0..32]
@@ -174,7 +238,7 @@ module BitcoinCigs
       "\x18Bitcoin Signed Message:\n#{message.length.chr}#{message}"
     end
     
-    def public_key_to_bc_address(public_key, network_version)
+    def public_key_to_bc_address(public_key, network_version = 0)
       h160 = hash_160(public_key)
       
       hash_160_to_bc_address(h160, network_version)
