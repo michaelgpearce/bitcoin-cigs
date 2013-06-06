@@ -6,14 +6,26 @@
 
 ## Examples
 
+Sign a message:
+```ruby
+require 'rubygems'
+require 'bitcoin-cigs'
+
+# Support for Wallet Import Format, Compressed WIF, Mini Format, Hex and Base64 wallets
+wallet_key = "5JFZuDkLgbEXK4CUEiXyyz4fUqzAsQ5QUqufdJy8MoLA9S1RdNX"
+message = "this is a message"
+
+puts "The signature is: #{BitcoinCigs.sign_message!(wallet_key, message)}"
+```
+
 Verify a message signature:
 ```ruby
 require 'rubygems'
 require 'bitcoin-cigs'
 
-address = "13C5HZKutjMDeuc7f5mPj6XGpJCZu7xKh2"
-signature = "H55JIuwEi4YXzINOzx2oU6VsfBcTOScpFtp10pP/M4EWV336ClH65SObwPXnRf/fMXDu8hs8nweB42CtpWgngeM="
-message = "aaa"
+address = "11o51X3ciSjoLWFN3sbg3yzCM8RSuD2q9"
+signature = "HIBYi2g3yFimzD/YSD9j+PYwtsdCuHR2xwIQ6n0AN6RPUVDGttgOmlnsiwx90ZSjmaWrH1/HwrINJbaP7eMA6V4="
+message = "this is a message"
 
 if BitcoinCigs.verify_message(address, signature, message)
   puts "It looks like you own address #{address}!"
