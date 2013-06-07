@@ -37,7 +37,7 @@ HIBYi2g3yFimzD/YSD9j+PYwtsdCuHR2xwIQ6n0AN6RPUVDGttgOmlnsiwx90ZSjmaWrH1/HwrINJbaP
 ~$ 
 ```
 
-## Ruby Gem API
+## Ruby API
 
 Sign a message:
 ```ruby
