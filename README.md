@@ -4,7 +4,7 @@
 
     gem install bitcoin-cigs
 
-## Command Line Interface
+## Command Line
 
 Usage:
 ```sh
@@ -12,8 +12,8 @@ Usage:
 Usage: bitcoin-cigs command [arguments ...] [options ...]
 
 Commands
-     verify bitcoin-address signature [message-file] [options ...]
-     sign private-key [message-file] [options ...]
+     verify bitcoin-address signature [message-file]
+     sign private-key [message-file]
 
 Options
     -m, --message MESSAGE            Message can also be read from STDIN
