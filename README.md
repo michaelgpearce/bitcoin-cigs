@@ -2,7 +2,7 @@
 
 ## Installation
 
-```
+```sh
 ~$ gem install bitcoin-cigs
 ```
 
