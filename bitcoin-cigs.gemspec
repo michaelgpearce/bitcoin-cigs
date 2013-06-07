@@ -15,8 +15,9 @@ Gem::Specification.new do |s|
   s.rubyforge_project = "bitcoin-cigs"
 
   s.files = `git ls-files`.split("\n")
-  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.test_files = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.require_paths = ["lib"]
+  s.executables = ['bitcoin-cigs']
 
   s.add_development_dependency 'rspec', '~> 2.13.0'
   s.add_development_dependency 'rake', '~> 10.0.4'
