@@ -8,7 +8,7 @@
 
 Usage:
 ```sh
-~ $ bitcoin-cigs 
+~$ bitcoin-cigs 
 Usage: bitcoin-cigs command [arguments ...] [options ...]
 
 Commands
