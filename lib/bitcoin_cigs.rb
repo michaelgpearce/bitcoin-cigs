@@ -45,13 +45,14 @@ module BitcoinCigs
       order = g.order
       
       sig = decode64(signature)
-      raise ::BitcoinCigs::Error.new("Bad signature") if sig.size != 65
+      raise ::BitcoinCigs::Error.new("Bad signature length") if sig.size != 65
+      raise ::BitcoinCigs::Error.new("Bad characters in signature") if signature != encode64(sig)
       
       hb = sig[0].ord
       r, s = [sig[1...33], sig[33...65]].collect { |s| str_to_num(s) }
       
       
-      raise ::BitcoinCigs::Error.new("Bad first byte") if hb < 27 || hb >= 35
+      raise ::BitcoinCigs::Error.new("Bad signature first byte") if hb < 27 || hb >= 35
       
       compressed = false
       if hb >= 31
@@ -79,7 +80,7 @@ module BitcoinCigs
     
       public_key = ::BitcoinCigs::PublicKey.new(g, q, compressed)
       addr = public_key_to_bc_address(public_key.ser(), network_version)
-      raise ::BitcoinCigs::Error.new("Bad address. Signing: #{addr}, Received: #{address}") if address != addr
+      raise ::BitcoinCigs::Error.new("Incorrect address or message for signature.") if address != addr
       
       nil
     end

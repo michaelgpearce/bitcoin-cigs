@@ -103,8 +103,7 @@ describe BitcoinCigs do
       let(:address) { "invalid" }
       
       it "raises ::BitcoinCigs::Error" do
-        # TODO: improve message
-        expect { subject }.to raise_error(::BitcoinCigs::Error, "Bad address. Signing: #{original_address}, Received: #{address}")
+        expect { subject }.to raise_error(::BitcoinCigs::Error, "Incorrect address or message for signature.")
       end
     end
     
@@ -112,7 +111,7 @@ describe BitcoinCigs do
       let(:signature) { "invalid" }
       
       it "raises ::BitcoinCigs::Error" do
-        expect { subject }.to raise_error(::BitcoinCigs::Error, "Bad signature")
+        expect { subject }.to raise_error(::BitcoinCigs::Error, "Bad signature length")
       end
     end
     
@@ -120,8 +119,7 @@ describe BitcoinCigs do
       let(:message) { "invalid" }
       
       it "raises ::BitcoinCigs::Error" do
-        # TODO: wrong message, also occurs in python version
-        expect { subject }.to raise_error(::BitcoinCigs::Error, "Bad address. Signing: 1Es3JV8zYTMtbg7rPMizYZYPc8rcvsJ21m, Received: #{address}")
+        expect { subject }.to raise_error(::BitcoinCigs::Error, "Incorrect address or message for signature.")
       end
     end
   end
