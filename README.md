@@ -32,6 +32,10 @@ if BitcoinCigs.verify_message(address, signature, message)
 end
 ```
 
+A command line client is also included:
+```
+```
+
 # Credits
 
 Thanks to jackjack for pointing me to Armory's implementation of message signatures:
