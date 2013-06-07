@@ -33,7 +33,17 @@ end
 ```
 
 A command line client is also included:
-```
+```sh
+~ $ bitcoin-cigs 
+Usage: bitcoin-cigs command [arguments ...] [options ...]
+
+Commands
+     verify bitcoin-address signature [message-file]
+     sign private-key [message-file]
+
+Options
+    -m, --message MESSAGE            Message can also be read from STDIN
+    -S, --no-strip                   Do not strip leading and trailing whitespace from message (stripped by default)
 ```
 
 # Credits
