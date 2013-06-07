@@ -46,6 +46,17 @@ Options
     -S, --no-strip                   Do not strip leading and trailing whitespace from message (stripped by default)
 ```
 
+With some examples:
+```sh
+~ $ # Sign with -m message parameter
+~ $ bitcoin-cigs sign 5JFZuDkLgbEXK4CUEiXyyz4fUqzAsQ5QUqufdJy8MoLA9S1RdNX -m 'this is a message'
+HIBYi2g3yFimzD/YSD9j+PYwtsdCuHR2xwIQ6n0AN6RPUVDGttgOmlnsiwx90ZSjmaWrH1/HwrINJbaP7eMA6V4=
+~ $ 
+~ $ # Verify with message from STDIN
+~ $ echo 'this is a message' | bitcoin-cigs verify 11o51X3ciSjoLWFN3sbg3yzCM8RSuD2q9 HIBYi2g3yFimzD/YSD9j+PYwtsdCuHR2xwIQ6n0AN6RPUVDGttgOmlnsiwx90ZSjmaWrH1/HwrINJbaP7eMA6V4=
+~ $ 
+```
+
 # Credits
 
 Thanks to jackjack for pointing me to Armory's implementation of message signatures:
