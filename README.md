@@ -22,7 +22,7 @@ Options
     -S, --no-strip                   Do not strip leading and trailing whitespace from message (stripped by default)
 ```
 
-With some examples:
+Examples:
 ```sh
 ~$ # Sign with -m message parameter
 ~$ bitcoin-cigs sign 5JFZuDkLgbEXK4CUEiXyyz4fUqzAsQ5QUqufdJy8MoLA9S1RdNX -m 'this is a message'
