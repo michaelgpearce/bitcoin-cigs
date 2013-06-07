@@ -12,8 +12,8 @@ Usage:
 Usage: bitcoin-cigs command [arguments ...] [options ...]
 
 Commands
-     verify bitcoin-address signature [message-file]
-     sign private-key [message-file]
+     verify bitcoin-address signature [message-file] [options ...]
+     sign private-key [message-file] [options ...]
 
 Options
     -m, --message MESSAGE            Message can also be read from STDIN
