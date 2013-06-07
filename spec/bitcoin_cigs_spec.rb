@@ -128,7 +128,7 @@ describe BitcoinCigs do
     subject { BitcoinCigs.verify_message(address, signature, message) }
     
     context "with valid data" do
-      it "verifies valid message" do
+      it "returns true" do
         expect(subject).to be_true
       end
     end
@@ -136,7 +136,7 @@ describe BitcoinCigs do
     context "with invalid data" do
       let(:address) { "invalid" }
       
-      it "raises ::BitcoinCigs::Error" do
+      it "returns false" do
         expect(subject).to be_false
       end
     end
