@@ -9,13 +9,13 @@ describe BitcoinCigs::Base58 do
     
     context "with valid data" do
       it "decodes properly" do
-        expect(Base64.encode64(subject).strip).to eq("ABgIZ4vqJRDJAqbMPNKKwHNFFgMWIJM1kQ==")
+        expect(subject.unpack('H*').first).to eq("001808678bea2510c902a6cc3cd28ac0734516031620933591")
       end
     end
   end
   
   describe "encode" do
-    let(:data) { Base64.decode64("ABgIZ4vqJRDJAqbMPNKKwHNFFgMWIJM1kQ==") }
+    let(:data) { ["001808678bea2510c902a6cc3cd28ac0734516031620933591"].pack('H*') }
     
     subject { BitcoinCigs::Base58.encode(data) }
     
