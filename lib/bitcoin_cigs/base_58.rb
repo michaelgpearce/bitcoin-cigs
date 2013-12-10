@@ -13,7 +13,7 @@ module BitcoinCigs
       
       leading_zeros = /^#{CHARS[0]}*/.match(s).to_s.size
       
-      ["#{"\x00\x00" * leading_zeros}#{int_val.to_s(16)}"].pack('H*')
+      ["#{"00" * leading_zeros}#{int_val.to_s(16)}"].pack('H*')
     end
     
     def self.encode(s)

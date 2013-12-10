@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    bitcoin-cigs (0.0.4)
+    bitcoin-cigs (0.0.5)
 
 GEM
   remote: http://rubygems.org/
