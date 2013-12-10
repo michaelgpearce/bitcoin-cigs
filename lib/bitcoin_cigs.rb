@@ -1,15 +1,16 @@
-require 'bitcoin_cigs/error'
-require 'bitcoin_cigs/crypto_helper'
-require 'bitcoin_cigs/base_58'
-require 'bitcoin_cigs/curve_fp'
-require 'bitcoin_cigs/point'
-require 'bitcoin_cigs/public_key'
-require 'bitcoin_cigs/private_key'
-require 'bitcoin_cigs/signature'
-require 'bitcoin_cigs/ec_key'
+%w(error crypto_helper base_58 curve_fp point public_key private_key signature ec_key).each do |f|
+  require File.join(File.dirname(__FILE__), 'bitcoin_cigs', f)
+end
 
 module BitcoinCigs
-  PRIVATE_KEY_PREFIX = 0x80
+  PRIVATE_KEY_PREFIX = {
+    :mainnet => 0x80,
+    :testnet => 0xEF
+  }
+  NETWORK_VERSION = {
+    :mainnet => 0x00,
+    :testnet => 0x6F
+  }
   
   P = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F
   R = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141
@@ -24,17 +25,19 @@ module BitcoinCigs
   class << self
     include ::BitcoinCigs::CryptoHelper
     
-    def verify_message(address, signature, message)
+    def verify_message(address, signature, message, options = {:network => :mainnet})
       begin
-        verify_message!(address, signature, message)
+        verify_message!(address, signature, message, options)
         true
       rescue ::BitcoinCigs::Error
         false
       end
     end
     
-    def verify_message!(address, signature, message)
-      network_version = str_to_num(decode58(address)) >> (8 * 24)
+    def verify_message!(address, signature, message, options = {:network => :mainnet})
+      decoded_address = decode58(address)
+      raise ::BitcoinCigs::Error.new("Incorrect address or message for signature.") if decoded_address.nil?
+      network_version = str_to_num(decoded_address) >> (8 * 24)
 
       message = calculate_hash(format_message_to_sign(message))
 
@@ -79,29 +82,29 @@ module BitcoinCigs
       
     
       public_key = ::BitcoinCigs::PublicKey.new(g, q, compressed)
-      addr = public_key_to_bc_address(public_key.ser(), network_version)
+      addr = public_key_to_bc_address(public_key.ser(), NETWORK_VERSION[options[:network]])
       raise ::BitcoinCigs::Error.new("Incorrect address or message for signature.") if address != addr
       
       nil
     end
     
-    def sign_message(wallet_key, message)
+    def sign_message(wallet_key, message, options = {:network => :mainnet})
       begin
-        sign_message!(wallet_key, message)
+        sign_message!(wallet_key, message, options)
       rescue ::BitcoinCigs::Error
         nil
       end
     end
     
-    def sign_message!(wallet_key, message)
-      private_key = convert_wallet_format_to_bytes!(wallet_key)
+    def sign_message!(wallet_key, message, options = {:network => :mainnet})
+      private_key = convert_wallet_format_to_bytes!(wallet_key, options[:network])
       
       msg_hash = sha256(sha256(format_msg_to_sign(message)))
       
       ec_key = ::BitcoinCigs::EcKey.new(str_to_num(private_key))
       private_key = ec_key.private_key
       public_key = ec_key.public_key
-      addr = public_key_to_bc_address(get_pub_key(ec_key, ec_key.public_key.compressed))
+      addr = public_key_to_bc_address(get_pub_key(ec_key, ec_key.public_key.compressed), NETWORK_VERSION[options[:network]])
       
       sig = private_key.sign(msg_hash, random_k)
       raise ::BitcoinCigs::Error.new("Unable to sign message") unless public_key.verify(msg_hash, sig)
@@ -113,7 +116,7 @@ module BitcoinCigs
         sign_64 = encode64(sign)
         
         begin
-          verify_message!(addr, sign_64, message)
+          verify_message!(addr, sign_64, message, options)
           return sign_64
         rescue ::BitcoinCigs::Error
           next
@@ -123,11 +126,11 @@ module BitcoinCigs
       raise ::BitcoinCigs::Error, "Unable to construct recoverable key"
     end
     
-    def convert_wallet_format_to_bytes!(input)
-      bytes = if is_wallet_import_format?(input)
-        decode_wallet_import_format(input)
-      elsif is_compressed_wallet_import_format?(input)
-        decode_compressed_wallet_import_format(input)
+    def convert_wallet_format_to_bytes!(input, network)
+      bytes = if is_wallet_import_format?(input, network)
+        decode_wallet_import_format(input, network)
+      elsif is_compressed_wallet_import_format?(input, network)
+        decode_compressed_wallet_import_format(input, network)
       elsif is_mini_format?(input)
         sha256(input)
       elsif is_hex_format?(input)
@@ -170,28 +173,30 @@ module BitcoinCigs
       decode_hex(key)
     end
 
-    def decode_wallet_import_format(input)
-      bytes = decode58(input)[1..-1]
+    def decode_wallet_import_format(input, network)
+      bytes = decode58(input)#[1..-1]
+      #puts "ASDF #{bytes.unpack('H*')}"
+      #puts bytes.bytes.collect {|e| e.to_i}.join(" ")
       hash = bytes[0..32]
       
       checksum = sha256(sha256(hash))
-      raise ::BitcoinCigs::Error.new("Wallet checksum invalid") if bytes[33..-1] != checksum[0...4]
+      raise ::BitcoinCigs::Error.new("Wallet checksum invalid") if bytes[33..37] != checksum[0..3]
 
       version, hash = hash[0], hash[1..-1]
-      raise ::BitcoinCigs::Error.new("Wallet Version #{version} not supported") if version.ord != PRIVATE_KEY_PREFIX
+      raise ::BitcoinCigs::Error.new("Wallet Version #{version} not supported") if version.ord != PRIVATE_KEY_PREFIX[network]
       
       hash
     end
     
-    def decode_compressed_wallet_import_format(input)
+    def decode_compressed_wallet_import_format(input, network)
       bytes = decode58(input)
       hash = bytes[0...34]
       
       checksum = sha256(sha256(hash))
-      raise ::BitcoinCigs::Error.new("Wallet checksum invalid") if bytes[34..-1] != checksum[0...4]
+      raise ::BitcoinCigs::Error.new("Wallet checksum invalid") if bytes[34..37] != checksum[0..3]
 
       version, hash = hash[0], hash[1..32]
-      raise ::BitcoinCigs::Error.new("Wallet Version #{version} not supported") if version.ord != PRIVATE_KEY_PREFIX
+      raise ::BitcoinCigs::Error.new("Wallet Version #{version} not supported") if version.ord != PRIVATE_KEY_PREFIX[network]
       
       hash
     end
@@ -202,13 +207,13 @@ module BitcoinCigs
     end
     
     # 51 characters base58 starting with 5
-    def is_wallet_import_format?(key)
-      /^5[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/ =~ key
+    def is_wallet_import_format?(key, network)
+      /^#{network == :mainnet ? '5' : '9'}[123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{50}$/ =~ key
     end
     
     # 52 characters base58 starting with L or K
-    def is_compressed_wallet_import_format?(key)
-      /^[LK][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/ =~ key
+    def is_compressed_wallet_import_format?(key, network)
+      /^[network == :mainnet ? 'LK' : 'c'][123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]{51}$/ =~ key
     end
     
     # 44 characters
@@ -239,7 +244,7 @@ module BitcoinCigs
       "\x18Bitcoin Signed Message:\n#{message.length.chr}#{message}"
     end
     
-    def public_key_to_bc_address(public_key, network_version = 0)
+    def public_key_to_bc_address(public_key, network_version)
       h160 = hash_160(public_key)
       
       hash_160_to_bc_address(h160, network_version)

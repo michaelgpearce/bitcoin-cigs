@@ -1,1 +1,1 @@
-require 'bitcoin_cigs'
+require File.join(File.dirname(__FILE__), 'bitcoin_cigs.rb')
