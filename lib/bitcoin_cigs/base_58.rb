@@ -38,47 +38,5 @@ module BitcoinCigs
       
       result
     end
-    
-    # def self.encode(s)
-    #   int_val = s.unpack('H*').first.to_i(16)
-    #   
-    #   var bi = BigInteger.fromByteArrayUnsigned(input);
-    #   var chars = [];
-    # 
-    #   while (bi.compareTo(B58.base) >= 0) {
-    #     var mod = bi.mod(B58.base);
-    #     chars.unshift(B58.alphabet[mod.intValue()]);
-    #     bi = bi.subtract(mod).divide(B58.base);
-    #   }
-    #   chars.unshift(B58.alphabet[bi.intValue()]);
-    # 
-    #   for (var i = 0; i < input.length; i++) {
-    #     if (input[i] == 0x00) {
-    #       chars.unshift(B58.alphabet[0]);
-    #     } else break;
-    #   }
-    # 
-    #   return chars.join('');
-    # end
-    
-    # def self.encode(s)
-    #   value = 0
-    #   
-    #   value = s.chars.reverse_each.each_with_index.inject(0) { |acc, (ch, i)| acc + (256 ** i) * ch.ord }
-    # 
-    #   result = []
-    #   while value >= CHAR_SIZE
-    #     div, mod = value / CHAR_SIZE, value % CHAR_SIZE
-    #     result.unshift(CHARS[mod])
-    #     value = div
-    #   end
-    #   result.unshift(CHARS[value])
-    # 
-    #   pad_size = s.chars.inject(0) { |acc, ch| acc + (ch == "\0" ? 1 : 0) }
-    #   
-    #   result.unshift(CHARS[0] * pad_size)
-    # 
-    #   result.join
-    # end
   end
 end
