@@ -194,5 +194,52 @@ describe BitcoinCigs do
       end
     end
   end
+
+  describe "get_signature_address!" do
+    subject { BitcoinCigs.get_signature_address!(signature, message, :network => network) }
+    
+    context "with valid data" do
+      it "returns correct address" do
+        expect(subject).to eq(address)
+      end
+    end
+    
+    context "with invalid signature" do
+      let(:signature) { "invalid" }
+      
+      it "raises ::BitcoinCigs::Error" do
+        expect { subject }.to raise_error(::BitcoinCigs::Error, "Bad signature length")
+      end
+    end
+    
+    context "with invalid message" do
+      let(:message) { "invalid" }
+      
+      it "returns wrong address" do
+        expect(subject).not_to eq(address)
+      end
+    end
+    
+    context "with testnet" do
+      use_testnet
+      
+      context "with valid data" do
+        it "returns valid address" do
+          expect(subject).to eq(address)
+        end
+      end
+    end
+  end
+
+  describe "get_signature_address" do
+    subject { BitcoinCigs.get_signature_address(signature, message) }
+    
+    context "with valid data" do
+      it "returns true" do
+        expect(subject).to eq(address)
+      end
+    end
+  end
+
     
 end
