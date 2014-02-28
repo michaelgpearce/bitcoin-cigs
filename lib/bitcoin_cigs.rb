@@ -35,9 +35,27 @@ module BitcoinCigs
     end
     
     def verify_message!(address, signature, message, options = {:network => :mainnet})
+
       decoded_address = decode58(address)
       raise ::BitcoinCigs::Error.new("Incorrect address or message for signature.") if decoded_address.nil?
-      network_version = str_to_num(decoded_address) >> (8 * 24)
+      # network_version = str_to_num(decoded_address) >> (8 * 24)
+
+      addr = get_signature_address!(signature, message, options)
+
+      raise ::BitcoinCigs::Error.new("Incorrect address or message for signature.") if address != addr
+      
+      nil
+    end
+
+    def get_signature_address(signature, message, options = {:network => :mainnet})
+      begin
+        get_signature_address!(signature, message, options)
+      rescue ::BitcoinCigs::Error
+        false
+      end 
+    end
+
+    def get_signature_address!(signature, message, options = {:network => :mainnet})
 
       message = calculate_hash(format_message_to_sign(message))
 
@@ -82,10 +100,8 @@ module BitcoinCigs
       
     
       public_key = ::BitcoinCigs::PublicKey.new(g, q, compressed)
-      addr = public_key_to_bc_address(public_key.ser(), NETWORK_VERSION[options[:network]])
-      raise ::BitcoinCigs::Error.new("Incorrect address or message for signature.") if address != addr
       
-      nil
+      public_key_to_bc_address(public_key.ser(), NETWORK_VERSION[options[:network]])
     end
     
     def sign_message(wallet_key, message, options = {:network => :mainnet})
