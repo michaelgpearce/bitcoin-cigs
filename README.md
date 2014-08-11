@@ -72,6 +72,13 @@ https://github.com/jackjack-jj/jasvet
 
 [Bitcoin Cigs](https://github.com/michaelgpearce/bitcoin-cigs) is maintained by [Michael Pearce](https://github.com/michaelgpearce).
 
+# Donation
+
+If you find this software useful and wish to donate, you can do so here:
+```
+1Cyd1wG4hCXK5aRCJQu3KnnhSrrfgs7NeM
+```
+
 # Copyright
 
 Copyright (c) 2013 Michael Pearce. See LICENSE.txt for further details.
