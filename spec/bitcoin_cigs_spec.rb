@@ -29,6 +29,15 @@ describe BitcoinCigs do
       it "generates the correct signature" do
         expect(BitcoinCigs.verify_message(address, subject, message, :network => network)).to be_true
       end
+
+      context "with a message > 252 characters" do
+        let(:message) { "a" * 253 }
+
+        it "generates the correct signature" do
+          expect(BitcoinCigs.verify_message(address, subject, message, :network => network)).to be_true
+        end
+
+      end
     end
     
     context "invalid wallet key" do

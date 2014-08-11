@@ -1,4 +1,4 @@
-%w(error crypto_helper base_58 curve_fp point public_key private_key signature ec_key).each do |f|
+%w(error crypto_helper compact_int base_58 curve_fp point public_key private_key signature ec_key).each do |f|
   require File.join(File.dirname(__FILE__), 'bitcoin_cigs', f)
 end
 
@@ -115,7 +115,7 @@ module BitcoinCigs
     def sign_message!(wallet_key, message, options = {:network => :mainnet})
       private_key = convert_wallet_format_to_bytes!(wallet_key, options[:network])
       
-      msg_hash = sha256(sha256(format_msg_to_sign(message)))
+      msg_hash = sha256(sha256(format_message_to_sign(message)))
       
       ec_key = ::BitcoinCigs::EcKey.new(str_to_num(private_key))
       private_key = ec_key.private_key
@@ -162,8 +162,8 @@ module BitcoinCigs
     
     private
     
-    def format_msg_to_sign(message)
-      return "\x18Bitcoin Signed Message:\n#{message.size.chr}#{message}"
+    def format_message_to_sign(message)
+      "\x18Bitcoin Signed Message:\n#{::BitcoinCigs::CompactInt.new(message.size).encode}#{message}"
     end
     
     def random_k
@@ -254,10 +254,6 @@ module BitcoinCigs
     
     def calculate_hash(d)
       sha256(sha256(d))
-    end
-    
-    def format_message_to_sign(message)
-      "\x18Bitcoin Signed Message:\n#{message.length.chr}#{message}"
     end
     
     def public_key_to_bc_address(public_key, network_version)
